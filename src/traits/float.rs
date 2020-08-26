@@ -5,6 +5,7 @@ pub trait Sqrt {
 }
 
 pub trait Trig {
+    // Trigonometric functions
     fn acos(&self) -> Self;
     fn asin(&self) -> Self;
     fn atan(&self) -> Self;
@@ -14,6 +15,9 @@ pub trait Trig {
     fn cosh(&self) -> Self;
     fn sinh(&self) -> Self;
     fn tanh(&self) -> Self;
+    
+    // Trigonometric Constants
+    fn pi() -> Self;
 }
 
 pub trait Float: Signed + Numeric + Sqrt + Trig {}
@@ -28,7 +32,7 @@ macro_rules! wrapper {
 }
 
 macro_rules! impl_float {
-    ($float: ty) => {
+    ($float: ident) => {
         impl Signed for $float {
             wrapper!(abs);
             wrapper!(signum);
@@ -46,6 +50,9 @@ macro_rules! impl_float {
             wrapper!(cosh);
             wrapper!(sinh);
             wrapper!(tanh);
+            
+            #[inline(always)]
+            fn pi() -> Self { core::$float::consts::PI }
         }
         impl Identity for $float {
             #[inline(always)]
