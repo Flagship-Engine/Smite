@@ -11,6 +11,9 @@ pub trait Trig {
     fn cos(&self) -> Self;
     fn sin(&self) -> Self;
     fn tan(&self) -> Self;
+    fn cosh(&self) -> Self;
+    fn sinh(&self) -> Self;
+    fn tanh(&self) -> Self;
 }
 
 pub trait Float: Signed + Numeric + Sqrt + Trig {}
@@ -40,6 +43,9 @@ macro_rules! impl_float {
             wrapper!(cos);
             wrapper!(sin);
             wrapper!(tan);
+            wrapper!(cosh);
+            wrapper!(sinh);
+            wrapper!(tanh);
         }
         impl Identity for $float {
             #[inline(always)]
