@@ -19,7 +19,7 @@ macro_rules! wrapper {
     ($func: ident) => {
         #[inline(always)]
         fn $func(&self) -> Self {
-            Self::$func(*self)
+            <Self>::$func(*self)
         }
     };
 }

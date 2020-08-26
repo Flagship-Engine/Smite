@@ -1,12 +1,20 @@
 use super::{Identity, Numeric, Signed};
+use core::ops::*;
 
-pub trait Integer: Numeric {}
+pub trait Integer: Numeric + Eq + Ord {}
+
+pub trait Bitwise: Sized + Not<Output = Self>
+    + BitAnd<Self, Output = Self> + BitAndAssign<Self>
+    + BitOr<Self, Output = Self>  + BitOrAssign<Self>
+    + BitXor<Self, Output = Self> + BitXorAssign<Self>
+    + Shl<Self, Output = Self> + ShlAssign<Self>
+    + Shr<Self, Output = Self> + ShrAssign<Self> {}
 
 macro_rules! wrapper {
     ($func: ident) => {
         #[inline(always)]
         fn $func(&self) -> Self {
-            Self::$func(*self)
+            <Self>::$func(*self)
         }
     };
 }
@@ -19,6 +27,7 @@ macro_rules! impl_uint {
         }
         impl Numeric for $int {}
         impl Integer for $int {}
+        impl Bitwise for $int {}
     };
 }
 
