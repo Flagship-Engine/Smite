@@ -29,4 +29,5 @@ pub trait Numeric:
     + Div<Self, Output = Self> + DivAssign<Self>
     + Mul<Self, Output = Self> + MulAssign<Self>
     + Sub<Self, Output = Self> + SubAssign<Self>
+    + Rem<Self, Output = Self> + RemAssign<Self>
     + Zero + Identity {}

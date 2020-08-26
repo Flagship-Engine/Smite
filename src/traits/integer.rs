@@ -3,7 +3,8 @@ use core::ops::*;
 
 pub trait Integer: Numeric + Eq + Ord {}
 
-pub trait Bitwise: Sized + Not<Output = Self>
+pub trait Bitwise:
+    Sized + Not<Output = Self>
     + BitAnd<Self, Output = Self> + BitAndAssign<Self>
     + BitOr<Self, Output = Self>  + BitOrAssign<Self>
     + BitXor<Self, Output = Self> + BitXorAssign<Self>
