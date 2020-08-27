@@ -1,5 +1,6 @@
 use core::iter::*;
 use core::ops::*;
+use std::fmt::Debug;
 
 pub mod float;
 pub mod integer;
@@ -23,7 +24,8 @@ impl<N: Numeric + Default> Zero for N {
 }
 
 pub trait Numeric:
-    Sized + Clone + PartialEq + PartialOrd
+    Sized + Debug + Clone + Copy
+    + PartialEq + PartialOrd
     + Sum<Self> + Product<Self>
     + Add<Self, Output = Self> + AddAssign<Self>
     + Div<Self, Output = Self> + DivAssign<Self>
