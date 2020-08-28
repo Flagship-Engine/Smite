@@ -4,6 +4,9 @@ use core::ops::*;
 pub mod float;
 pub mod integer;
 
+pub use float::Float;
+pub use integer::Integer;
+
 pub trait Signed: Sized + Neg<Output = Self> {
     fn abs(&self) -> Self;
     fn signum(&self) -> Self;
@@ -23,7 +26,7 @@ impl<N: Numeric + Default> Zero for N {
 }
 
 pub trait Numeric:
-    Sized + Clone + PartialEq + PartialOrd
+    Sized + Copy + Clone + PartialEq + PartialOrd
     + Sum<Self> + Product<Self>
     + Add<Self, Output = Self> + AddAssign<Self>
     + Div<Self, Output = Self> + DivAssign<Self>

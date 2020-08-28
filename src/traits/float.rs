@@ -15,7 +15,7 @@ pub trait Trig {
     fn cosh(&self) -> Self;
     fn sinh(&self) -> Self;
     fn tanh(&self) -> Self;
-    
+
     // Trigonometric Constants
     fn pi() -> Self;
 }
@@ -50,7 +50,7 @@ macro_rules! impl_float {
             wrapper!(cosh);
             wrapper!(sinh);
             wrapper!(tanh);
-            
+
             #[inline(always)]
             fn pi() -> Self { core::$float::consts::PI }
         }
