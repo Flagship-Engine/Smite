@@ -1,6 +1,15 @@
 use super::*;
 use crate::angle::AsRadians;
 
+#[test]
+fn vec3_should_have_identity_as_1_1_1() {
+    assert_eq!(Vec3::identity(), Vec3::new(1, 1, 1));
+}
+
+#[test]
+fn vec3_should_have_zero_as_0_0_0() {
+    assert_eq!(Vec3::zero(), Vec3::new(0, 0, 0));
+}
 
 #[test]
 fn sum_on_vec3_is_sum_of_components() {
@@ -73,17 +82,17 @@ fn normalized_float_vec3_has_magnitude_of_one() {
 }
 
 #[test]
-fn vec3_unit_x_const_is_1_0_0() {
+fn vec3_should_have_unit_x_as_1_0_0() {
     assert_eq!(Vec3::unit_x(), Vec3::new(1, 0, 0));
 }
 
 #[test]
-fn vec3_unit_y_const_is_0_1_0() {
+fn vec3_should_have_unit_y_as_0_1_0() {
     assert_eq!(Vec3::unit_y(), Vec3::new(0, 1, 0));
 }
 
 #[test]
-fn vec3_unit_z_const_is_0_0_1() {
+fn vec3_should_have_unit_z_as_0_0_1() {
     assert_eq!(Vec3::unit_z(), Vec3::new(0, 0, 1));
 }
 

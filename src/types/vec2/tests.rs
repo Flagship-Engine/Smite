@@ -2,6 +2,16 @@ use super::*;
 use crate::angle::AsRadians;
 
 #[test]
+fn vec2_should_have_identity_as_1_1() {
+    assert_eq!(Vec2::identity(), Vec2::new(1, 1));
+}
+
+#[test]
+fn vec2_should_have_zero_as_0_0() {
+    assert_eq!(Vec2::zero(), Vec2::new(0, 0));
+}
+
+#[test]
 fn sum_on_vec2_is_sum_of_components() {
     assert_eq!(Vec2::new(1, 2).sum(), 1 + 2);
     assert_eq!(Vec2::new(4, 3).sum(), 4 + 3);
@@ -58,12 +68,12 @@ fn normalized_float_vec2_has_magnitude_of_one() {
 }
 
 #[test]
-fn vec2_unit_x_const_is_1_0() {
+fn vec2_should_have_unit_x_as_1_0() {
     assert_eq!(Vec2::unit_x(), Vec2::new(1, 0));
 }
 
 #[test]
-fn vec2_unit_y_const_is_0_1() {
+fn vec2_should_have_unit_x_as_0_1() {
     assert_eq!(Vec2::unit_y(), Vec2::new(0, 1));
 }
 

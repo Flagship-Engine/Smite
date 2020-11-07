@@ -2,7 +2,9 @@
 mod swizzle;
 #[cfg(test)]
 mod tests;
+use crate::traits::Identity;
 #[cfg(feature = "vec4-swizzle")]
+use crate::traits::Zero;
 pub use swizzle::*;
 
 use crate::angle::Radians;
@@ -74,20 +76,32 @@ macro_rules! make_math_operations {
                     self[0] $op *other, // x
                     self[1] $op *other, // y
                     self[2] $op *other, // z
-                    self[3] $op *other, // z
+                    self[3] $op *other, // w
                 ])
             }
         }
     };
 
-    (@assign ($Left:ty, $Right:ty), ($op:tt, $trait:ident, $fn:ident)) => {
+    (@assign vec-vec ($Left:ty, $Right:ty), ($op:tt, $trait:ident, $fn:ident)) => {
         impl<Value: Copy + core::ops::$trait<Value>> core::ops::$trait<$Right> for $Left {
             #[inline(always)]
             fn $fn(&mut self, other: $Right) {
-                self[0] $op other[0];
-                self[1] $op other[1];
-                self[2] $op other[2];
-                self[3] $op other[3];
+                self[0] $op other[0]; // x
+                self[1] $op other[1]; // y
+                self[2] $op other[2]; // z
+                self[3] $op other[3]; // w
+            }
+        }
+    };
+
+    (@assign vec-val ($Left:ty, $Right:ty), ($op:tt, $trait:ident, $fn:ident)) => {
+        impl<Value: Copy + core::ops::$trait<Value>> core::ops::$trait<$Right> for $Left {
+            #[inline(always)]
+            fn $fn(&mut self, other: $Right) {
+                self[0] $op other; // x
+                self[1] $op other; // y
+                self[2] $op other; // z
+                self[3] $op other; // w
             }
         }
     };
@@ -150,9 +164,11 @@ macro_rules! make_math_operations {
             make_math_operations!(@infix vec-val deref (&Vec4<Value>, &mut Value), ($op1, $tr1, $f1)  );
             make_math_operations!(@infix vec-val deref (&mut Vec4<Value>, &mut Value), ($op1, $tr1, $f1)  );
 
-            make_math_operations!(@assign (Vec4<Value>, Vec4<Value>), ($op2, $tr2, $f2)  );
-            make_math_operations!(@assign (Vec4<Value>, &Vec4<Value>), ($op2, $tr2, $f2)  );
-            make_math_operations!(@assign (Vec4<Value>, &mut Vec4<Value>), ($op2, $tr2, $f2)  );
+            make_math_operations!(@assign vec-val (Vec4<Value>, Value), ($op2, $tr2, $f2)  );
+
+            make_math_operations!(@assign vec-vec (Vec4<Value>, Vec4<Value>), ($op2, $tr2, $f2)  );
+            make_math_operations!(@assign vec-vec (Vec4<Value>, &Vec4<Value>), ($op2, $tr2, $f2)  );
+            make_math_operations!(@assign vec-vec (Vec4<Value>, &mut Vec4<Value>), ($op2, $tr2, $f2)  );
 
             make_math_operations![@prim ($op1, $tr1, $f1) f32, f64, i8, i16, i32, i64, i128, u8, u16, u32, u64, u128];
         )*
@@ -214,9 +230,36 @@ impl<Value: Copy> Vec4<Value> {
     pub fn set_w(&mut self, n: Value) {
         self[3] = n;
     }
+
+    #[inline(always)]
+    pub fn as_array(&self) -> [Value; 4] {
+        self.0
+    }
 }
 
-impl<Value: Numeric> Vec4<Value> {
+impl<Value: Identity> Identity for Vec4<Value> {
+    fn identity() -> Self {
+        Self([
+            Value::identity(), // x
+            Value::identity(), // y
+            Value::identity(), // z
+            Value::identity(), // w
+        ])
+    }
+}
+
+impl<Value: Zero> Zero for Vec4<Value> {
+    fn zero() -> Self {
+        Self([
+            Value::zero(), // x
+            Value::zero(), // y
+            Value::zero(), // z
+            Value::zero(), // w
+        ])
+    }
+}
+
+impl<Value: Identity + Zero> Vec4<Value> {
     #[inline(always)]
     pub fn unit_x() -> Self {
         Self([
@@ -256,7 +299,9 @@ impl<Value: Numeric> Vec4<Value> {
             Value::identity(), // w
         ])
     }
+}
 
+impl<Value: Numeric> Vec4<Value> {
     #[inline(always)]
     pub fn sum(&self) -> Value {
         self.iter().cloned().sum()
@@ -265,10 +310,7 @@ impl<Value: Numeric> Vec4<Value> {
     /// dot product of two vectors
     #[inline(always)]
     pub fn dot(&self, other: &Self) -> Value {
-        self.iter()
-            .zip(other.iter())
-            .map(|(&a, &b)| a * b)
-            .sum()
+        self.iter().zip(other.iter()).map(|(&a, &b)| a * b).sum()
     }
 
     #[inline(always)]
@@ -289,8 +331,7 @@ impl<Value: Numeric> Vec4<Value> {
 
     #[inline(always)]
     pub fn scale_by(&mut self, other: &Self) -> &mut Self {
-        self
-            .iter_mut()
+        self.iter_mut()
             .zip(other.iter())
             .for_each(|(v, &s)| *v *= s);
         self
@@ -307,9 +348,7 @@ impl<Value: Numeric + Sqrt> Vec4<Value> {
     pub fn distance_to(&self, other: &Self) -> Value {
         (other - self).magnitude()
     }
-}
 
-impl<Value: Float> Vec4<Value> {
     #[inline(always)]
     pub fn normalize(&mut self) -> &mut Self {
         let len = self.magnitude();
@@ -318,7 +357,9 @@ impl<Value: Float> Vec4<Value> {
         }
         self
     }
+}
 
+impl<Value: Float> Vec4<Value> {
     /// angle between two vectors
     pub fn angle_between(&self, other: &Self) -> Radians<Value> {
         Radians::new((self.dot(other) / (self.magnitude() * other.magnitude())).acos())
@@ -358,15 +399,45 @@ impl<T> From<(T, T, T, T)> for Vec4<T> {
     }
 }
 
+impl<T> From<Vec4<T>> for (T, T, T, T) {
+    fn from(Vec4([x, y, z, w]): Vec4<T>) -> Self {
+        (x, y, z, w)
+    }
+}
+
 impl<T> From<[T; 4]> for Vec4<T> {
     fn from(data: [T; 4]) -> Self {
         Self(data)
     }
 }
 
+impl<T> From<Vec4<T>> for [T; 4] {
+    fn from(Vec4(data): Vec4<T>) -> Self {
+        data
+    }
+}
+
 impl<T: Copy> From<&[T; 4]> for Vec4<T> {
     fn from(data: &[T; 4]) -> Self {
         Self(*data)
+    }
+}
+
+impl<T: Copy> From<&Vec4<T>> for [T; 4] {
+    fn from(&Vec4(data): &Vec4<T>) -> Self {
+        data
+    }
+}
+
+impl<T: Copy> From<&mut [T; 4]> for Vec4<T> {
+    fn from(data: &mut [T; 4]) -> Self {
+        Self(*data)
+    }
+}
+
+impl<T: Copy> From<&mut Vec4<T>> for [T; 4] {
+    fn from(&mut Vec4(data): &mut Vec4<T>) -> Self {
+        data
     }
 }
 

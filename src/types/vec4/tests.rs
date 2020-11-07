@@ -1,6 +1,16 @@
 use super::*;
 
 #[test]
+fn vec4_should_have_identity_as_1_1_1_1() {
+    assert_eq!(Vec4::identity(), Vec4::new(1, 1, 1, 1));
+}
+
+#[test]
+fn vec4_should_have_zero_as_0_0_0_0() {
+    assert_eq!(Vec4::zero(), Vec4::new(0, 0, 0, 0));
+}
+
+#[test]
 fn sum_on_vec4_is_sum_of_components() {
     assert_eq!(Vec4::new(1, 2, 3, 4).sum(), 1 + 2 + 3 + 4);
     assert_eq!(Vec4::new(4, 3, 1, 9).sum(), 4 + 3 + 1 + 9);
@@ -10,7 +20,7 @@ fn sum_on_vec4_is_sum_of_components() {
 fn dot_of_two_vec4_is_sum_of_elementwise_products() {
     let a = Vec4::new(5, 6, 7, 8);
     let b = Vec4::new(3, 4, 5, 2);
-    assert_eq!(a.dot(&b), 5 * 3 + 6 * 4 + 7 * 5 + 8*2);
+    assert_eq!(a.dot(&b), 5 * 3 + 6 * 4 + 7 * 5 + 8 * 2);
 
     let a = Vec4::new(-2, -6, 3, 7);
     let b = Vec4::new(3, -2, 4, -3);
@@ -34,7 +44,10 @@ fn scaling_a_vec4_by_scalar_is_componentwise_multiplication_by_scalar() {
 fn scaling_a_vec4_by_vec4_is_componentwise_multiplication() {
     let mut a = Vec4::new(-2, -6, 3, 7);
     let b = Vec4::new(3, -2, 4, -3);
-    assert_eq!(a.scale_by(&b), &mut Vec4::new(-2 * 3, -6 * -2, 3 * 4, 7 * -3));
+    assert_eq!(
+        a.scale_by(&b),
+        &mut Vec4::new(-2 * 3, -6 * -2, 3 * 4, 7 * -3)
+    );
 }
 
 #[test]
@@ -57,21 +70,21 @@ fn normalized_float_vec4_has_magnitude_of_one() {
 }
 
 #[test]
-fn vec4_unit_x_const_is_1_0_0_0() {
+fn vec4_should_have_unit_x_as_1_0_0_0() {
     assert_eq!(Vec4::unit_x(), Vec4::new(1, 0, 0, 0));
 }
 
 #[test]
-fn vec4_unit_y_const_is_0_1_0_0() {
+fn vec4_should_have_unit_y_as_0_1_0_0() {
     assert_eq!(Vec4::unit_y(), Vec4::new(0, 1, 0, 0));
 }
 
 #[test]
-fn vec4_unit_z_const_is_0_0_1_0() {
+fn vec4_should_have_unit_z_as_0_0_1_0() {
     assert_eq!(Vec4::unit_z(), Vec4::new(0, 0, 1, 0));
 }
 
 #[test]
-fn vec4_unit_w_const_is_0_0_0_1() {
+fn vec4_should_have_unit_w_as_0_0_0_1() {
     assert_eq!(Vec4::unit_w(), Vec4::new(0, 0, 0, 1));
 }
