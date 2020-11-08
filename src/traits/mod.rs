@@ -1,27 +1,12 @@
 use core::iter::*;
 use core::ops::*;
-use std::fmt::Debug;
+use core::fmt::Debug;
 
+pub mod generic;
 pub mod float;
 pub mod integer;
 
-pub trait Signed: Sized + Neg<Output = Self> {
-    fn abs(&self) -> Self;
-    fn signum(&self) -> Self;
-}
-
-pub trait Identity {
-    fn identity() -> Self;
-}
-
-pub trait Zero {
-    fn zero() -> Self;
-}
-
-impl<N: Numeric + Default> Zero for N {
-    #[inline(always)]
-    fn zero() -> Self { Self::default() }
-}
+pub use generic::{Identity, Signed, Zero};
 
 pub trait Numeric:
     Sized + Debug + Clone + Copy
@@ -32,4 +17,4 @@ pub trait Numeric:
     + Mul<Self, Output = Self> + MulAssign<Self>
     + Sub<Self, Output = Self> + SubAssign<Self>
     + Rem<Self, Output = Self> + RemAssign<Self>
-    + Zero + Identity {}
+    + Identity + Zero {}
