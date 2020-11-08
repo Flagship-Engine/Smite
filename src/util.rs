@@ -15,20 +15,28 @@ macro_rules! export {
 #[cfg(test)]
 macro_rules! assert_approx_eq {
     ($left:expr, $right:expr) => {
-        assert_approx_eq!($left, $right, "");
-    };
-    ($left:expr, $right:expr, $msg:expr) => {
-        match (&$left, &$right, &$msg) {
-            (left_val, right_val, msg) => {
+        match (&$left, &$right) {
+            (left_val, right_val) => {
                 if left_val - 10.0 * core::f32::EPSILON > *right_val
                     || left_val + 10.0 * core::f32::EPSILON < *right_val
                 {
-                    panic!(
-                        r#"assertion failed: `(left == right)`
+                    panic!(r#"assertion failed: `(left == right)`
   left: `{:?}`,
- right: `{:?}`: {}"#,
-                        &*left_val, &*right_val, &*msg
-                    )
+ right: `{:?}`"#, &*left_val, &*right_val)
+                }
+            }
+        }
+    };
+    ($left:expr, $right:expr, $($arg:tt)+) => {
+        match (&$left, &$right) {
+            (left_val, right_val) => {
+                if left_val - 10.0 * core::f32::EPSILON > *right_val
+                    || left_val + 10.0 * core::f32::EPSILON < *right_val
+                {
+                    panic!(r#"assertion failed: `(left == right)`
+  left: `{:?}`,
+ right: `{:?}`: {}"#, &*left_val, &*right_val,
+                           format_args!($($arg)+))
                 }
             }
         }

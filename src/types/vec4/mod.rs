@@ -194,6 +194,12 @@ impl<Value> Vec4<Value> {
     pub fn iter_mut(&mut self) -> core::slice::IterMut<'_, Value> {
         self.0.iter_mut()
     }
+
+    pub fn map<F>(mut self, f: F) -> Self
+    where F: Fn(&Value) -> Value {
+        self.iter_mut().for_each(|v| *v = f(v));
+        self
+    }
 }
 
 impl<Value: Copy> Vec4<Value> {

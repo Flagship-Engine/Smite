@@ -207,6 +207,14 @@ impl<Value: Numeric> Mul<Value> for Quat<Value> {
     }
 }
 
+impl<Value: Numeric> Mul<Value> for &Quat<Value> {
+    type Output = Quat<Value>;
+    #[inline(always)]
+    fn mul(self, other: Value) -> Quat<Value> {
+        *self * other
+    }
+}
+
 ////// scalar division //////
 impl<Value: Numeric> DivAssign<Value> for Quat<Value> {
     #[inline(always)]
@@ -224,6 +232,34 @@ impl<Value: Numeric> Div<Value> for Quat<Value> {
     }
 }
 
+impl<Value: Numeric> Div<Value> for &Quat<Value> {
+    type Output = Quat<Value>;
+    #[inline(always)]
+    fn div(self, other: Value) -> Quat<Value> {
+        *self / other
+    }
+}
+
+////// quaternion negation //////
+impl<Value: Numeric + Neg<Output = Value>> Neg for Quat<Value> {
+    type Output = Quat<Value>;
+    #[inline(always)]
+    fn neg(mut self) -> Quat<Value> {
+        self.s = -self.s;
+        self.v = -self.v;
+        self
+    }
+}
+
+impl<Value: Numeric + Neg<Output = Value>> Neg for &Quat<Value> {
+    type Output = Quat<Value>;
+    #[inline(always)]
+    fn neg(self) -> Quat<Value> {
+        -*self
+    }
+}
+
+////// additional operations //////
 impl<Value: Numeric> Quat<Value> {
     #[inline(always)]
     pub fn square(mut self) -> Quat<Value> {
@@ -240,7 +276,6 @@ impl<Value: Numeric> Quat<Value> {
     }
 }
 
-////// additional operations //////
 impl<Value: Numeric + Neg<Output = Value>> Quat<Value> {
     #[inline(always)]
     pub fn conjugate(mut self) -> Quat<Value> {
@@ -292,5 +327,27 @@ impl<Value: Float> Quat<Value> {
         let s = self.s;
         let u = self.v;
         v * (s * s - u.dot(&u)) + u.cross(&v) * two * s + (u * u.dot(&v) * two)
+    }
+
+    /// Note: Assumes the quaternions are both unit size
+    #[inline(always)]
+    pub fn slerp(&self, other: &Quat<Value>, progress: Value) -> Quat<Value> {
+        let one = Value::identity();
+
+        let dot = self.v.dot(&other.v) + self.s * other.s;
+        let dot_abs = dot.abs();
+        let dot_sign = dot.signum();
+
+        if dot_abs >= one {
+            return *self;
+        }
+
+        let half_angle = dot_abs.acos();
+        let sin_half_angle = (one - dot_abs * dot_abs).sqrt();
+
+        let a = dot_sign * ((one - progress) * half_angle).sin() / sin_half_angle;
+        let b = (progress * half_angle).sin() / sin_half_angle;
+
+        self * a + other * b
     }
 }
