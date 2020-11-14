@@ -37,6 +37,10 @@ impl<Number: Trig> Radians<Number> {
     pub fn tan(&self) -> Number {
         self.0.tan()
     }
+    #[inline(always)]
+    pub fn value(self) -> Number {
+        self.0
+    }
 }
 
 macro_rules! make_math_operations {
@@ -164,5 +168,11 @@ pub trait AsRadians<T> {
 impl<T: Trig + Copy> AsRadians<T> for T {
     fn as_radians(&self) -> Radians<T> {
         Radians::new(*self)
+    }
+}
+
+impl<T: core::fmt::Display> core::fmt::Display for Radians<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        write!(f, "{} rad", self.0)
     }
 }

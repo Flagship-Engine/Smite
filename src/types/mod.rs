@@ -2,6 +2,7 @@ export! {
     vec2::Vec2;
     vec3::Vec3;
     vec4::Vec4;
+    mat3::Mat3;
     mat4::Mat4;
     quat::Quat;
 }

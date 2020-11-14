@@ -151,6 +151,7 @@ fn quat_conjugate_should_negate_vector_part() {
 
 #[test]
 fn product_of_quat_and_its_inverse_should_be_identity_quat() {
+
     let q1 = Quat::new(3.0, Vec3::new(1.0, 2.0, 4.0));
     assert_eq!(q1 * q1.inverse(), Quat::identity());
     assert_eq!(q1.inverse() * q1, Quat::identity());
@@ -182,6 +183,8 @@ macro_rules! assert_quat_approx_eq {
         }
     };
 }
+
+// #region from_axis_angle
 
 #[allow(clippy::cognitive_complexity)]
 fn from_axis_angle_test_helper(axis: Vec3<f32>, axis_name: &str) {
@@ -269,7 +272,9 @@ fn quat_from_axis_angle_should_work_for_any_axis() {
         "(x, y, z) = (0, 1000, -1000)",
     );
 }
+// #endregion
 
+// #region apply_rotation
 #[test]
 fn quat_should_rotate_vec3s_correctly() {
     const PI: f32 = core::f32::consts::PI;
@@ -297,7 +302,122 @@ fn quat_should_rotate_vec3s_correctly() {
         }
     }
 }
+// #endregion
 
+// #region lerp
+#[test]
+fn quats_should_lerp_correctly_between_cardinal_axes() {
+    let qs = [
+        Quat::new(1.0, [0.0, 0.0, 0.0].into()),
+        Quat::new(0.0, [1.0, 0.0, 0.0].into()),
+        Quat::new(0.0, [0.0, 1.0, 0.0].into()),
+        Quat::new(0.0, [0.0, 0.0, 1.0].into()),
+    ];
+
+    const STEPS: usize = 100;
+    const FSTEPS: f32 = STEPS as f32;
+    const INCREMENT: f32 = 1.0 / FSTEPS;
+
+    for p in &qs {
+        for q in &qs {
+            for i in 0..=STEPS {
+                let f = i as f32;
+                let t = INCREMENT * f;
+
+                let r = if p == q {
+                   *p
+                } else {
+                    p + (q - p) * t
+                };
+                assert_quat_approx_eq!(p.lerp(&q, t), r, "lerp({:?}, {:?}, {}) == {:?}", p, q, t, r);
+            }
+        }
+    }
+}
+
+#[test]
+#[allow(clippy::unreadable_literal)]
+#[allow(clippy::excessive_precision)]
+fn quats_should_lerp_correctly_between_arbitrary_orientations() {
+    let p = Quat::new(1.0/3.0, [2.0/3.0, 2.0/3.0, 0.0].into());
+    let q = Quat::new(0.0, [-2.0/3.0, 2.0/3.0, -1.0/3.0].into());
+
+    let tests = [
+        (0.0, p),
+        (0.1, Quat::new(0.3, [0.533333333333, 0.666666666667, -0.0333333333333].into())),
+        (0.2, Quat::new(0.266666666667, [0.4, 0.666666666667, -0.0666666666667].into())),
+        (0.3, Quat::new(0.233333333333, [0.266666666667, 0.666666666667, -0.1].into())),
+        (0.5, Quat::new(0.166666666667, [0.0, 0.666666666667, -0.166666666667].into())),
+        (0.75, Quat::new(0.0833333333333, [-0.333333333333, 0.666666666667, -0.25].into())),
+        (0.9, Quat::new(0.0333333333333, [-0.533333333333, 0.666666666667, -0.3].into())),
+        (1.0, q),
+    ];
+
+    for (t, r) in &tests {
+        assert_quat_approx_eq!(p.lerp(&q, *t), r, "lerp({:?}, {:?}, {}) == {:?}", p, q, t, r);
+    }
+}
+// #endregion
+
+// #region nlerp
+#[test]
+fn quats_should_nlerp_correctly_between_cardinal_axes() {
+    let qs = [
+        Quat::new(1.0, [0.0, 0.0, 0.0].into()),
+        Quat::new(0.0, [1.0, 0.0, 0.0].into()),
+        Quat::new(0.0, [0.0, 1.0, 0.0].into()),
+        Quat::new(0.0, [0.0, 0.0, 1.0].into()),
+    ];
+
+    const STEPS: usize = 100;
+    const FSTEPS: f32 = STEPS as f32;
+    const INCREMENT: f32 = 1.0 / FSTEPS;
+
+    for p in &qs {
+        for q in &qs {
+            for i in 0..=STEPS {
+                let f = i as f32;
+                let t = INCREMENT * f;
+
+                let r = if p == q {
+                   *p
+                } else {
+                    (p + (q - p) * t).normalized()
+                };
+
+                assert_quat_approx_eq!(p.nlerp(&q, t), r, "nlerp({:?}, {:?}, {}) == {:?}", p, q, t, r);
+            }
+        }
+    }
+}
+
+#[test]
+#[allow(clippy::unreadable_literal)]
+#[allow(clippy::excessive_precision)]
+fn quats_should_nlerp_correctly_between_arbitrary_orientations() {
+    let p = Quat::new(1.0/3.0, [2.0/3.0, 2.0/3.0, 0.0].into());
+    let q = Quat::new(0.0, [-2.0/3.0, 2.0/3.0, -1.0/3.0].into());
+
+    // https://www.desmos.com/calculator/0z67ir3gd8
+
+    let tests = [
+        (0.0, p),
+        (0.1, Quat::new(0.331294578225, [0.588968139066, 0.736210173832, -0.0368105086916].into())),
+        (0.2, Quat::new(0.323380833382, [0.485071250073, 0.808452083454, -0.0808452083454].into())),
+        (0.3, Quat::new(0.306381676673, [0.350150487626, 0.875376219065, -0.13130643286].into())),
+        (0.5, Quat::new(0.235702260396, [0.0, 0.942809041582, -0.235702260396].into())),
+        (0.75, Quat::new(0.105409255339, [-0.421637021356, 0.843274042712, -0.316227766017].into())),
+        (0.9, Quat::new(0.0368105086916, [-0.588968139066, 0.736210173832, -0.331294578225].into())),
+        (1.0, q),
+    ];
+
+    for (t, r) in &tests {
+        assert_quat_approx_eq!(p.nlerp(&q, *t), r, "nlerp({:?}, {:?}, {}) == {:?}", p, q, t, r);
+    }
+}
+// #endregion
+
+// #region slerp
 #[test]
 fn quats_should_slerp_correctly_between_cardinal_axes() {
     const PI: f32 = core::f32::consts::PI;
@@ -354,6 +474,7 @@ fn quats_should_slerp_correctly_between_arbitrary_orientations() {
     ];
 
     for (t, r) in &tests {
-        assert_quat_approx_eq!(p.slerp(&q, *t), r);
+        assert_quat_approx_eq!(p.slerp(&q, *t), r, "slerp({:?}, {:?}, {}) == {:?}", p, q, t, r);
     }
 }
+// #endregion

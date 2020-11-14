@@ -89,6 +89,14 @@ impl<Value: Numeric> AddAssign<Quat<Value>> for Quat<Value> {
         self.v += other.v;
     }
 }
+
+impl<Value: Numeric> AddAssign<&Quat<Value>> for Quat<Value> {
+    #[inline(always)]
+    fn add_assign(&mut self, other: &Quat<Value>) {
+        *self += *other;
+    }
+}
+
 impl<Value: Numeric> Add<Quat<Value>> for Quat<Value> {
     type Output = Quat<Value>;
     #[inline(always)]
@@ -98,19 +106,28 @@ impl<Value: Numeric> Add<Quat<Value>> for Quat<Value> {
     }
 }
 
-impl<Value: Numeric> AddAssign<&Quat<Value>> for Quat<Value> {
-    #[inline(always)]
-    fn add_assign(&mut self, other: &Quat<Value>) {
-        self.s += other.s;
-        self.v += other.v;
-    }
-}
 impl<Value: Numeric> Add<&Quat<Value>> for Quat<Value> {
     type Output = Quat<Value>;
     #[inline(always)]
     fn add(mut self, other: &Quat<Value>) -> Quat<Value> {
-        self += other;
+        self += *other;
         self
+    }
+}
+
+impl<Value: Numeric> Add<Quat<Value>> for &Quat<Value> {
+    type Output = Quat<Value>;
+    #[inline(always)]
+    fn add(self, other: Quat<Value>) -> Quat<Value> {
+        *self + other
+    }
+}
+
+impl<Value: Numeric> Add<&Quat<Value>> for &Quat<Value> {
+    type Output = Quat<Value>;
+    #[inline(always)]
+    fn add(self, other: &Quat<Value>) -> Quat<Value> {
+        *self + *other
     }
 }
 
@@ -122,6 +139,14 @@ impl<Value: Numeric> SubAssign<Quat<Value>> for Quat<Value> {
         self.v -= other.v;
     }
 }
+
+impl<Value: Numeric> SubAssign<&Quat<Value>> for Quat<Value> {
+    #[inline(always)]
+    fn sub_assign(&mut self, other: &Quat<Value>) {
+        *self -= *other;
+    }
+}
+
 impl<Value: Numeric> Sub<Quat<Value>> for Quat<Value> {
     type Output = Quat<Value>;
     #[inline(always)]
@@ -131,19 +156,28 @@ impl<Value: Numeric> Sub<Quat<Value>> for Quat<Value> {
     }
 }
 
-impl<Value: Numeric> SubAssign<&Quat<Value>> for Quat<Value> {
-    #[inline(always)]
-    fn sub_assign(&mut self, other: &Quat<Value>) {
-        self.s -= other.s;
-        self.v -= other.v;
-    }
-}
 impl<Value: Numeric> Sub<&Quat<Value>> for Quat<Value> {
     type Output = Quat<Value>;
     #[inline(always)]
     fn sub(mut self, other: &Quat<Value>) -> Quat<Value> {
-        self -= other;
+        self -= *other;
         self
+    }
+}
+
+impl<Value: Numeric> Sub<Quat<Value>> for &Quat<Value> {
+    type Output = Quat<Value>;
+    #[inline(always)]
+    fn sub(self, other: Quat<Value>) -> Quat<Value> {
+        *self - other
+    }
+}
+
+impl<Value: Numeric> Sub<&Quat<Value>> for &Quat<Value> {
+    type Output = Quat<Value>;
+    #[inline(always)]
+    fn sub(self, other: &Quat<Value>) -> Quat<Value> {
+        *self - *other
     }
 }
 
@@ -327,6 +361,16 @@ impl<Value: Float> Quat<Value> {
         let s = self.s;
         let u = self.v;
         v * (s * s - u.dot(&u)) + u.cross(&v) * two * s + (u * u.dot(&v) * two)
+    }
+
+    #[inline(always)]
+    pub fn lerp(&self, other: &Quat<Value>, progress: Value) -> Quat<Value> {
+        self + (other - self) * progress
+    }
+
+    #[inline(always)]
+    pub fn nlerp(&self, other: &Quat<Value>, progress: Value) -> Quat<Value> {
+        self.lerp(other, progress).normalized()
     }
 
     /// Note: Assumes the quaternions are both unit size
