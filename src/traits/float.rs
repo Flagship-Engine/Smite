@@ -1,5 +1,12 @@
 use super::{Identity, Numeric, Signed};
 
+pub trait Round {
+    fn round(&self) -> Self;
+    fn floor(&self) -> Self;
+    fn trunc(&self) -> Self;
+    fn ceil(&self) -> Self;
+}
+
 pub trait Sqrt {
     fn sqrt(&self) -> Self;
 }
@@ -12,15 +19,12 @@ pub trait Trig {
     fn cos(&self) -> Self;
     fn sin(&self) -> Self;
     fn tan(&self) -> Self;
-    fn cosh(&self) -> Self;
-    fn sinh(&self) -> Self;
-    fn tanh(&self) -> Self;
 
     // Trigonometric Constants
     fn pi() -> Self;
 }
 
-pub trait Float: Signed + Numeric + Sqrt + Trig {}
+pub trait Float: Signed + Numeric + Round + Sqrt + Trig {}
 
 macro_rules! wrapper {
     ($func: ident) => {
@@ -33,6 +37,12 @@ macro_rules! wrapper {
 
 macro_rules! impl_float {
     ($float: ident) => {
+        impl Round for $float {
+            wrapper!(round);
+            wrapper!(floor);
+            wrapper!(trunc);
+            wrapper!(ceil);
+        }
         impl Signed for $float {
             wrapper!(abs);
             wrapper!(signum);
@@ -47,9 +57,6 @@ macro_rules! impl_float {
             wrapper!(cos);
             wrapper!(sin);
             wrapper!(tan);
-            wrapper!(cosh);
-            wrapper!(sinh);
-            wrapper!(tanh);
 
             #[inline(always)]
             fn pi() -> Self { core::$float::consts::PI }
