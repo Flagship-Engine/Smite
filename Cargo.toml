@@ -1,7 +1,13 @@
 [package]
-name = "flag"
-version = "0.0.0"
+name = "smite"
+description = "SIMD Math Implementation with Type-safe Execution"
 authors = ["Flagship Team"]
+keywords = ["algebra", "math", "simd"]
+categories = ["game-development", "mathematics"]
+repository = "https://github.com/Flagship-Engine/Smite"
+readme = "README.md"
+license = "MIT"
+version = "0.1.0"
 edition = "2018"
 
 [features]
