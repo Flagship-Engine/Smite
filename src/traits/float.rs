@@ -19,7 +19,7 @@ pub trait Trig {
     fn cos(&self) -> Self;
     fn sin(&self) -> Self;
     fn tan(&self) -> Self;
-    
+
     // Trigonometric Constants
     fn pi() -> Self;
 }
@@ -57,7 +57,7 @@ macro_rules! impl_float {
             wrapper!(cos);
             wrapper!(sin);
             wrapper!(tan);
-            
+
             #[inline(always)]
             fn pi() -> Self { core::$float::consts::PI }
         }
